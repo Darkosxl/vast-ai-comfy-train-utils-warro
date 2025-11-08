@@ -1,41 +1,40 @@
 # ComfyUI Cheap Trainer Utils
 
-**⚠️ v0.0.1 - Early Development Version**
-
-Basic ComfyUI nodes for uploading LoRA models and training data to Google Drive. Built for temporary cloud instances where you need to save training outputs before the instance shuts down.
-
-**Currently only tested on vast.ai instances.** May or may not work elsewhere.
+ComfyUI nodes for managing LoRA training workflows with Google Drive. Built for temporary cloud instances where you need to save training outputs before the instance shuts down.
 
 ## What It Does
 
+- Loads image-caption pairs from Google Drive for training
 - Saves trained LoRA models to Google Drive
-- Saves image-caption pairs to Google Drive
-- Uses Google Service Account for auth
+- Uses Google Service Account for authentication
 
 ## Nodes
 
-### SaveLoratoGoogleDrive
+### Load Caption Image Pair From Google Drive
+
+Loads batches of images and their corresponding text captions from a Google Drive folder for LoRA training.
+
+**Inputs:**
+- `folder_id`: Google Drive folder ID (the long string from the folder URL)
+- `credentials_json`: Google Service Account credentials as JSON string
+- `clip`: CLIP model for encoding captions
+
+**Output:**
+- Batched images and encoded conditioning for training
+- Automatically pairs images with their corresponding `.txt` caption files
+
+### Save Lora To Google Drive
 
 Saves trained LoRA models directly to Google Drive with optional step tracking in filenames.
 
 **Inputs:**
 - `lora`: The trained LoRA model to save
 - `prefix`: Filename prefix for the saved model (default: "Comfy-trained-loras")
+- `folder_id`: Google Drive folder ID where the LoRA will be saved
 - `credentials_json`: Google Service Account credentials as JSON string
 - `steps` (optional): Training step count for filename tracking
 
 **Output:** Saves `.safetensors` file to Google Drive
-
-### textImagePairFromGoogleDrive
-
-Saves image and caption pairs to Google Drive for training dataset management.
-
-**Inputs:**
-- `images`: Images to save
-- `caption`: Text caption/description for the images
-- `credentials_json`: Google Service Account credentials as JSON string
-
-**Output:** Uploads image-caption pairs to Google Drive
 
 ## Installation
 
@@ -63,20 +62,25 @@ Restart ComfyUI.
 
 ## Usage
 
+### Loading Training Data
+
+1. Upload your training images and caption files to a Google Drive folder
+   - Each image should have a corresponding `.txt` file with the same name
+   - Example: `image1.png` and `image1.txt`
+2. Get the folder ID from the Google Drive URL
+3. Add the "Load Caption Image Pair From Google Drive" node to your workflow
+4. Paste your credentials JSON and folder ID
+5. Connect the outputs to your training node
+
+### Saving Trained LoRAs
+
 1. Get a Google Service Account JSON (see Setup section)
-2. Add the node to your workflow
-3. Paste your credentials JSON
-4. Connect your LoRA output
-5. Run it
+2. Add the "Save Lora To Google Drive" node to your workflow
+3. Paste your credentials JSON and the target folder ID
+4. Connect your trained LoRA output
+5. Run your workflow
 
-That's it. If it works, your LoRA goes to Drive. If it doesn't, good luck debugging.
-
-## Known Issues
-
-- Barely tested
-- Code is incomplete in places
-- No error handling to speak of
-- Only tested on vast.ai, YMMV elsewhere
+The nodes validate folder access before uploading and provide clear error messages if something goes wrong.
 
 ## Contributing
 
